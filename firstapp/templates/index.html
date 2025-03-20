@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drag & Drop CRM</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
+    <style>
+        body 
+        { 
+            font-family: Arial, sans-serif; 
+            text-align: center; 
+            background-color: #b1cee7; /* Light blue background */
+    margin: 0;
+    padding: 0;
+        }
+        .container 
+        { 
+            display: flex;
+    gap: 15px;
+    justify-content: center; /* Centers columns horizontally */
+    align-items: flex-start; /* Keeps columns aligned at the top */
+    flex-wrap: nowrap; /* Prevent wrapping */
+    overflow-x: auto;
+        }
+        .column { 
+    min-width: 200px;
+    max-width: 150px;
+    width: 95%;
+    min-height: 400px;
+    padding: 19px;
+    border-radius: 15px; /* Changed to solid to remove broken effect */
+    background-color: #ffffff;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    word-wrap: break-word;
+    white-space: normal;
+   /* Stylish Gradient */
+    box-shadow: 5px 5px 15px rgb(255, 254, 254); /* Smooth shadow */
+    transition: all 0.4s ease-in-out; 
+}
+
+
+/* Hover Effect */
+.column:hover {
+    transform: scale(1.05); /* Slight zoom effect */
+    box-shadow: 7px 7px 20px rgba(0, 0, 0, 0.5);
+    border-radius: 15px;
+}
+.column h3 {
+    text-align: center;
+    color: #34495e;
+}
+
+
+        .customer-card 
+        { 
+            padding: 10px;
+    margin: 5px;
+    background: rgb(94, 201, 237);
+    cursor: grab;
+    border-radius: 5px;
+    width: 90%;
+    text-align: center;
+    word-wrap: break-word; /* Wrap long words */
+    white-space: normal;
+
+        }
+        .add-button {
+    cursor: pointer;
+    font-size: 20px;
+    margin-left: 10px;
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    width: 350px;
+    text-align: left;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Close Button */
+
+
+/* Form Styling */
+.modal input,
+.modal select,
+.modal textarea {
+    width: 100%;
+    padding: 8px;
+    margin: 5px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+/* Form Submit Button */
+.modal button {
+    font-size: 16px; /* Medium-sized text */
+    padding: 10px 20px; /* Medium padding */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 5px;
+}
+
+/* Save Button - Blue */
+#saveCustomer {
+    background-color: #007bff;
+    color: white;
+}
+
+/* Close Button - Gray */
+.close-btn {
+    background-color: #6c757d;
+    color: white;
+}
+.modal button:hover {
+    background-color: #7a275c;
+}
+
+/* Overlay */
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+        
+        /* Send Email Modal - Extra Wide Rectangular Box */
+#emailModal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 800px; /* Increased width */
+    max-width: 95%;
+    padding: 20px;
+    border: 2px solid #ccc;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Input Fields & Textarea inside Email Modal */
+#emailModal input, 
+#emailModal textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+/* Message Textarea - Adjusted Height */
+#emailMessage {
+    width: 100%;
+    height: 150px;
+    resize: vertical; /* Allows user to expand */
+}
+
+/* Buttons - Medium Size */
+#emailModal button {
+    font-size: 16px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+#sendEmail {
+    background-color: #28a745; /* Green for send */
+    color: white;
+}
+
+.close-btn {
+    background-color: #dc3545; /* Red for close */
+    color: white;
+}
+
+
+/* Hover effect for the activity button */
+.activity-btn:hover {
+    background: #d886b2; /* Darker pink on hover */
+}
+.customer-card {
+    border: 2px solid #ddd;
+    padding: 10px;
+    border-radius: 5px;
+    background: #f9f9f9;
+    transition: 0.3s;
+}
+.column-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+.add-button {
+    font-size: 20px;
+    cursor: pointer;
+    margin-left: 10px;
+}
+.activity-style {
+    position: absolute;
+    top: 20px;  
+    margin-left: 27cm;
+    flex-direction: row;
+    display: flex;
+    gap: 10px;
+}
+
+.activity-style button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #fa6cb8;
+    color: white;
+    border-radius: 5px;
+    border-color:  #fa6cb8;
+    
+}
+
+
+   
+        
+    </style>
+</head>
+<body>
+
+    <h1>CRM</h1>
+    <div class="activity-style">
+        <a href="{% url 'customer_schedule' %}">
+            <button  class="activity-btn">Activity</button>
+        </a>
+        <a href="expired_activities">
+            <button class="activity-btn">Activity History</button>
+        </a>
+    </div>
+        <br><BR>
+
+    <div class="container">
+
+        {% for status in statuses %}
+            <div class="column" id="{{ status }}" ondragover="allowDrop(event)" ondrop="drop(event, '{{ status }}')">
+                <div class="column-header">
+                <h3>{{ status }}</h3>
+                {% if status == "New" %}
+                      <span class="add-button" onclick="openCustomerModal()">➕</span>
+                {% endif %}
+                </div>
+                {% for customer in customers %}
+                    {% if customer.status_display == status %}
+                    <div class="customer-card"   id="customer-{{ customer.id }}"  
+                        draggable="true" data-id="{{ customer.id }}" ondragstart="drag(event)">
+                        <a href="{% url 'customer_details' customer.id %}" style="text-decoration: none; color: black;">
+                            {{ customer.name }} - {{ customer.opportunity }}
+                        </a>
+                        
+                        <!-- Activity Icon Container -->
+                        <span class="activity-icon">
+                            {% if customer.activity == "call" %}
+                                <button onclick="makeCall('{{ customer.contact }}')">📞</button>
+                            {% elif customer.activity == "email" %}
+                                <button onclick="openEmailModal()"><i class='bx bx-envelope'></i></button>
+                            {% elif customer.activity == "whatsapp" %}
+                                <button onclick="openWhatsAppChat('{{ customer.contact }}')"><i class='bx bxl-whatsapp'></i></button>
+                            {% endif %}
+                        </span>
+                        
+                        <!-- Schedule Activity Button -->
+                        <button onclick="openScheduleModal('{{ customer.id }}')">
+                            <i class='bx bx-alarm'></i>
+                        </button>
+                    </div>                   
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+ 
+    <!-- Activity Modal -->
+    <div id="activityModal" class="modal">
+        <h3>Scheduled Activities</h3>
+        <ul id="activityList">
+            {% for activity in activities %}
+                <li>{{ activity.type }} - {{ activity.customer_email }} - {{ activity.date }}</li>
+            {% endfor %}
+        </ul>
+        <button class="close-btn" onclick="closeActivityModal()">Close</button>
+    </div>
+
+    <!-- Send Email Modal -->
+    <div id="emailModal" class="modal">
+        <h3>Send Email</h3>
+        
+        <label>From:</label>
+        <input type="email" id="fromEmail" value="keerthikala1105@gmail.com" readonly><br><br>
+        
+        <label>To:</label>
+        <input type="email" id="toEmail" placeholder="Enter recipient email"><br><br>
+        
+        <label>Subject:</label>
+        <input type="text" id="emailSubject" placeholder="Enter subject"><br><br>
+        
+        <label>Message:</label>
+        <textarea id="emailMessage" placeholder="Type your message"></textarea><br><br>
+        
+        <button id="sendEmail">Send</button>
+        <button class="close-btn" onclick="closeEmailModal()">Close</button>
+    </div>
+
+    <!-- Add Customer Modal -->
+    <div id="customerModal" class="modal">
+        <h3>Add Customer</h3>
+        <input type="text" id="date" readonly>
+        <input type="text" id="name" placeholder="Customer Name" required><br><br>
+        <input type="text" id="contact" placeholder="Contact No" required><br><br>
+        <input type="email" id="email" placeholder="Email" required><br><br>
+        <input type="text" id="opportunity" placeholder="Opportunity" required><br><br>
+        <button id="saveCustomer">Save</button>
+        <button class="close-btn" onclick="closeCustomerModal()">Close</button>
+    </div>
+
+    <!-- Schedule Activity Modal -->
+    <div id="scheduleModal" class="modal">
+        <h3>Schedule Activity</h3>
+        <input type="hidden" id="customer_id">
+        <label for="activity-date">Date:</label>
+        <input type="date" id="activity-date" name="activity-date" required><br><br>
+        <label>Activity:</label>
+        <select id="activity">
+            <option value="call">Call</option>
+            <option value="email">Email</option>
+            <option value="whatsapp">WhatsApp</option>
+        </select><style margin-right:2cm;></style>
+        <label>Summary:</label>
+        <input type="text" id="summary" placeholder="Summary" required><br><br>
+        <button id="scheduleActivity">Schedule</button>
+        <button class="close-btn" onclick="closeScheduleModal()">Close</button>
+    </div>
+
+
+    <script>
+        function openCustomerModal() {
+            let currentDate = new Date().toISOString().split("T")[0]; 
+            $("#date").val(currentDate); 
+            $("#customerModal").show();
+        }
+        function closeCustomerModal() {
+            $("#customerModal").hide();
+        }
+        function openScheduleModal(customerId) {
+            $("#customer_id").val(customerId);
+            $("#scheduleModal").show();
+        }
+        function closeScheduleModal() {
+            $("#scheduleModal").hide();
+        }
+          
+        $("#saveCustomer").click(function() {
+    let name = $("#name").val();
+    let contact = $("#contact").val();
+    let email = $("#email").val();
+    let opportunity = $("#opportunity").val();
+    let date = $("#date").val();  // Get the date value
+
+    if (!name || !contact || !email || !opportunity || !date) {
+        alert("All fields are required!");
+        return;
+    }
+
+    $.ajax({
+        type: "POST",
+        url: "/add_customer/",
+        data: {
+            name: name,
+            contact: contact,
+            email: email,
+            opportunity: opportunity,
+            date: date,  // Send date to backend
+            csrfmiddlewaretoken: "{{ csrf_token }}"
+        },
+        success: function(response) {
+            if (response.success) {
+                alert("Customer saved successfully!");
+                location.reload();
+            } else {
+                alert("Error: " + response.message);
+            }
+        },
+        error: function(xhr) {
+            alert("Error occurred: " + xhr.responseText);
+        }
+    });
+});
+
+
+        <!-- Schedule Activity Modal -->
+        $("#scheduleActivity").click(function() {
+                let customerId = $("#customer_id").val();
+                let activityDate = $("#activity-date").val();
+                let activity = $("#activity").val();
+                let summary = $("#summary").val();
+
+            if (!activityDate || !activity || !summary) {
+                    alert("All fields are required!");
+                    return;
+                }
+
+            $.ajax({
+                type: "POST",
+                url: "/save_activity/",
+                data: {
+                    customer_id: customerId,
+                    activity_date: activityDate,
+                    activity: activity,
+                    summary: summary,
+                    csrfmiddlewaretoken: "{{ csrf_token }}"
+                },
+                success: function(response) {
+                    if (response.success) {
+                        alert("Activity scheduled successfully!");
+                        location.reload();
+                } 
+                else 
+                {
+                    alert("Error: " + response.message);
+                }
+            },
+            error: function(xhr) {
+                alert("Error occurred: " + xhr.responseText);
+            }
+            });
+        });
+
+        function allowDrop(event) {
+             event.preventDefault();
+        }
+
+        function drag(event) {
+            let customer_id = event.target.dataset.id;
+            let current_column = event.target.closest(".column").id; // Get the parent column ID
+            console.log("Drag Start - Customer ID:", customer_id);
+            console.log("Drag Start - Current Column:", current_column);
+            event.dataTransfer.setData("customer_id", customer_id);
+            event.dataTransfer.setData("current_column", current_column);
+        }
+
+        $(".column").on("drop", function(e) {
+            e.preventDefault();
+
+            let customer_id = e.originalEvent.dataTransfer.getData("customer_id");
+            let current_column = e.originalEvent.dataTransfer.getData("current_column");
+            let new_status = $(this).attr("id");
+
+            console.log("Dragging Customer ID:", customer_id);
+            console.log("Current Column:", current_column);
+            console.log("New Column:", new_status);
+
+            let columnOrder = $(".column").map(function() {
+                return this.id;
+            }).get();
+
+            console.log("Column Order:", columnOrder);
+
+            let currentIndex = columnOrder.indexOf(current_column);
+            let newIndex = columnOrder.indexOf(new_status);
+
+            console.log("Current Index:", currentIndex);
+            console.log("New Index:", newIndex);
+
+            if (newIndex === -1 || currentIndex === -1) {
+                alert("Invalid move! Column ID mismatch.");
+                return;
+            }
+
+            if (newIndex > currentIndex) {
+                console.log("Moving to Next Stage ✅");
+                
+                $(this).append($(`.customer-card[data-id='${customer_id}']`));
+
+                $.ajax({
+                    type: "POST",
+                    url: "/update_status/",
+                    data: {
+                        customer_id: customer_id,
+                        status: new_status,
+                        csrfmiddlewaretoken: "{{ csrf_token }}"
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            console.log("Status updated successfully:", response.new_status);
+                        } else {
+                            alert("Failed to update status: " + response.message);
+                        }
+                    },
+                    error: function(xhr) {
+                        alert("Error occurred: " + xhr.responseText);
+                    }
+                });
+            } else {
+                alert("You can only move forward to the next stage!");
+            }
+        });
+                $.ajax({
+            type: "POST",
+            url: "/update_status/",  // Ensure this URL correctly maps to your Django view
+            data: {
+                customer_id: customer_id,
+                status: new_status,
+                csrfmiddlewaretoken: "{{ csrf_token }}"
+            },
+            success: function(response) {
+                console.log("AJAX Success:", response);
+                if (response.success) {
+                    console.log("Status updated in DB:", response.new_status);
+                } else {
+                    alert("Failed to update status: " + response.message);
+                }
+            },
+            error: function(xhr) {
+                console.error("AJAX Error:", xhr.responseText);
+                alert("Error occurred: " + xhr.responseText);
+            }
+        });
+
+
+
+
+        //CLOSE MODAL ACTIVTIY
+        function closeActivityModal() 
+        {
+            document.getElementById("activityModal").style.display = "none";
+            document.getElementById("overlay").style.display = "none";
+        }
+
+        //OPEN EMAIL ACCESS
+        function openEmailModal() 
+        {
+             $("#emailModal").show();  // Ensure the modal is displayed
+        }
+
+        //CLOSE EMAIL ACCESS
+        function closeEmailModal() 
+        {
+             $("#emailModal").hide();  
+        }
+
+        // SENDING EMAIL ACCESS
+        $(document).ready(function () {
+            $("#sendEmail").click(function () {
+                let fromEmail = $("#fromEmail").val().trim();
+                let toEmail = $("#toEmail").val().trim();
+                let subject = $("#emailSubject").val().trim();
+                let message = $("#emailMessage").val().trim();
+
+                console.log("From:", fromEmail);
+                console.log("To:", toEmail);
+                console.log("Subject:", subject);
+                console.log("Message:", message);
+
+                if (!toEmail || !subject || !message) {
+                    alert("Please enter recipient email, subject, and message.");
+                    return;
+                }
+
+                $.ajax({
+                    type: "POST",
+                    url: "/send_email/",
+                    data: {
+                        from_email: fromEmail,
+                        to_email: toEmail,
+                        subject: subject,
+                        message: message,
+                        csrfmiddlewaretoken: "{{ csrf_token }}"
+                    },
+                    success: function (response) {
+                        alert("Email sent successfully!");
+                        $("#emailModal").hide();
+                    },
+                    error: function (xhr) {
+                        alert("Failed to send email: " + xhr.responseText);
+                    }
+                });
+            });
+        });
+
+        // WHATSAPP ACCESS
+        function openWhatsAppChat(customerNumber) {
+            if (!customerNumber) {
+                alert("Customer number is missing!");
+                return;
+            }
+
+            let senderNumber = ""; // Replace with your actual WhatsApp number
+            let whatsappURL = `https://wa.me/${customerNumber}?text=Hello%20from%20CRM!`;
+
+            window.open(whatsappURL, "_blank");
+        }
+
+        // CALL LINK
+        function makeCall(phoneNumber) {
+            if (!phoneNumber) {
+                alert("Customer number is missing!");
+                return;
+        }
+            window.location.href = `tel:${phoneNumber}`;
+        }
+
+        // SAVING THE ACTIVITIES
+        document.querySelectorAll(".activity-button").forEach(button => {
+            button.addEventListener("click", function () {
+                let customerId = this.dataset.customerId;
+                let selectedActivity = this.dataset.activity;
+
+                fetch("/save_activities/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
+                    },
+                    body: `customer_id=${customerId}&activity=${selectedActivity}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        let customerCard = $(`.customer-card[data-id='${customerId}'] .activity-icon`);
+                        if (customerCard) {
+                            customerCard.innerHTML = getActivityIcon(selectedActivity);
+                        } else {
+                            console.error("Element .activity-icon not found for customer", customerId);
+                        }
+                    } else {
+                        alert("Error: " + data.message);
+                    }
+                })
+                .catch(error => console.error("AJAX Error: ", error));
+            });
+        });  
+    </script>
+</body>
+</html>
